@@ -23,6 +23,7 @@ upstream web_server {
 server {
     listen 80;
     server_name ${DOMAIN};
+    large_client_header_buffers 4 64k;
 
     client_max_body_size 5G;    # Maximum upload size    
 

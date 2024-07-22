@@ -55,7 +55,7 @@ export function Header({ user, page }: HeaderProps) {
                   )}
                 </div>
               ) : (
-                <HeaderTitle>Danswer</HeaderTitle>
+                <HeaderTitle>OntoBot</HeaderTitle>
               )}
             </div>
           </div>

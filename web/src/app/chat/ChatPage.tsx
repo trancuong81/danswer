@@ -774,8 +774,7 @@ export function ChatPage({
           )
           .map((document) => document.db_doc_id as number),
         queryOverride,
-        forceSearch,
-
+        forceSearch: true,
         modelProvider: llmOverrideManager.llmOverride.name || undefined,
         modelVersion:
           llmOverrideManager.llmOverride.modelName ||
