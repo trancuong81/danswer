@@ -591,7 +591,7 @@ export function ChatPage({
           )
           .map((document) => document.db_doc_id as number),
         queryOverride,
-        forceSearch,
+        forceSearch: true,
         modelVersion:
           searchParams.get(SEARCH_PARAM_NAMES.MODEL_VERSION) || undefined,
         temperature:

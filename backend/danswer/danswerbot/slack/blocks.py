@@ -36,6 +36,18 @@ from danswer.utils.text_processing import decode_escapes
 from danswer.utils.text_processing import replace_whitespaces_w_space
 
 _MAX_BLURB_LEN = 45
+_NO_CITATIONS = True
+
+
+def _remove_citations_for_slack(text: str) -> str:
+    """
+    We remove citations for Slack because citations is less meaningful in the case of OntoBot.
+    """
+    # Regular expression to find all instances of [[x]](LINK)
+    pattern = r"\[\[(.*?)\]\]\((.*?)\)"
+
+    # Substitute all matches in the input text
+    return re.sub(pattern, "", text)
 
 
 def get_feedback_reminder_blocks(thread_link: str, include_followup: bool) -> Block:
@@ -242,14 +254,18 @@ def build_sources_blocks(
     num_docs_to_display: int = DANSWER_BOT_NUM_DOCS_TO_DISPLAY,
 ) -> list[Block]:
     if not cited_documents:
-        return [
-            SectionBlock(
-                text="*Warning*: no sources were cited for this answer, so it may be unreliable 😔"
-            )
-        ]
+        if (_NO_CITATIONS):
+            return []
+        else:
+            return [
+                SectionBlock(
+                    text="*Warning*: no sources were cited for this answer, so it may be unreliable 😔"
+                )
+            ]
 
     seen_docs_identifiers = set()
-    section_blocks: list[Block] = [SectionBlock(text="*Sources:*")]
+    section_blocks: list[Block] = [] if (_NO_CITATIONS) else [SectionBlock(text="*Sources:*")]
+    # section_blocks: list[Block] = [SectionBlock(text="*Sources:*")]
     included_docs = 0
     for citation_num, d in cited_documents:
         if d.document_id in seen_docs_identifiers:
@@ -282,28 +298,29 @@ def build_sources_blocks(
             + ([days_ago_str] if days_ago_str else [])
         )
 
-        document_title = clean_markdown_link_text(doc_sem_id)
-        img_link = source_to_github_img_link(d.source_type)
+        if (_NO_CITATIONS == False):
+            document_title = clean_markdown_link_text(doc_sem_id)
+            img_link = source_to_github_img_link(d.source_type)
 
-        section_blocks.append(
-            ContextBlock(
-                elements=(
-                    [
-                        ImageElement(
-                            image_url=img_link,
-                            alt_text=f"{d.source_type.value} logo",
-                        )
+            section_blocks.append(
+                ContextBlock(
+                    elements=(
+                        [
+                            ImageElement(
+                                image_url=img_link,
+                                alt_text=f"{d.source_type.value} logo",
+                            )
+                        ]
+                        if img_link
+                        else []
+                    )
+                    + [
+                        MarkdownTextObject(
+                            text=f"*<{d.link}|[{citation_num}] {document_title}>*\n{final_metadata_str}"
+                        ),
                     ]
-                    if img_link
-                    else []
                 )
-                + [
-                    MarkdownTextObject(
-                        text=f"*<{d.link}|[{citation_num}] {document_title}>*\n{final_metadata_str}"
-                    ),
-                ]
             )
-        )
 
         if included_docs >= num_docs_to_display:
             break
@@ -397,7 +414,10 @@ def build_qa_response_blocks(
     else:
         answer_processed = decode_escapes(remove_slack_text_interactions(answer))
         if process_message_for_citations:
-            answer_processed = _process_citations_for_slack(answer_processed)
+            if (_NO_CITATIONS):
+                answer_processed = _remove_citations_for_slack(answer_processed)
+            else:
+                answer_processed = _process_citations_for_slack(answer_processed)
         answer_blocks = [
             SectionBlock(text=text) for text in _split_text(answer_processed)
         ]

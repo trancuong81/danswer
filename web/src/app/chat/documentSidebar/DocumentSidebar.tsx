@@ -79,7 +79,7 @@ export function DocumentSidebar({
             name={
               selectedMessageRetrievalType === RetrievalType.SelectedDocs
                 ? "Referenced Documents"
-                : "Retrieved Documents"
+                : "Retrieved Anduin Documents"
             }
             icon={FiFileText}
           />

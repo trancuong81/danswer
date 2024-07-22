@@ -91,7 +91,8 @@ GEN_AI_HISTORY_CUTOFF = 3000
 # message. At query time, we don't actually enforce this - we will only throw an
 # error if the total # of tokens exceeds the max input tokens.
 GEN_AI_SINGLE_USER_MESSAGE_EXPECTED_MAX_TOKENS = 512
-GEN_AI_TEMPERATURE = float(os.environ.get("GEN_AI_TEMPERATURE") or 0)
+# GEN_AI_TEMPERATURE = float(os.environ.get("GEN_AI_TEMPERATURE") or 0)
+GEN_AI_TEMPERATURE = 0
 
 # should be used if you are using a custom LLM inference provider that doesn't support
 # streaming format AND you are still using the langchain/litellm LLM class
